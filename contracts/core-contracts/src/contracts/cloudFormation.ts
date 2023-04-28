@@ -1,6 +1,6 @@
 import { CloudFormationContract } from '@swarmion/serverless-contracts';
 
-import { projectName } from '@test-supabase-nextauth-swarmion/serverless-configuration';
+import { projectName } from '@notion-ai-assistant/serverless-configuration';
 
 export const httpApiResourceContract = new CloudFormationContract({
   id: 'core-httpApi',

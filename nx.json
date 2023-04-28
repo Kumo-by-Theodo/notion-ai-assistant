@@ -1,5 +1,5 @@
 {
-  "npmScope": "test-supabase-nextauth-swarmion",
+  "npmScope": "notion-ai-assistant",
   "tasksRunnerOptions": {
     "default": {
       "runner": "nx/tasks-runners/default",

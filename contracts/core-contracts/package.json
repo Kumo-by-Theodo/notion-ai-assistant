@@ -1,5 +1,5 @@
 {
-  "name": "@test-supabase-nextauth-swarmion/core-contracts",
+  "name": "@notion-ai-assistant/core-contracts",
   "private": true,
   "version": "1.0.0",
   "license": "UNLICENSED",
@@ -30,8 +30,8 @@
     "watch": "pnpm clean && concurrently 'pnpm:package-* --watch'"
   },
   "dependencies": {
-    "@swarmion/serverless-contracts": "^0.28.1",
-    "@test-supabase-nextauth-swarmion/serverless-configuration": "workspace:1.0.0"
+    "@notion-ai-assistant/serverless-configuration": "workspace:1.0.0",
+    "@swarmion/serverless-contracts": "^0.28.1"
   },
   "devDependencies": {
     "@types/node": "^18.11.18",

@@ -47,7 +47,7 @@
     },
     "typescript.tsdk": "node_modules/typescript/lib",
     "vitest.commandLine": "pnpm vitest",
-    "vitest.disabledWorkspaceFolders": ["test-supabase-nextauth-swarmion root"],
+    "vitest.disabledWorkspaceFolders": ["notion-ai-assistant root"],
     "cSpell.words": ["esbuild", "swarmion"]
   },
   "extensions": {
@@ -67,7 +67,7 @@
   "folders": [
     {
       "path": ".",
-      "name": "test-supabase-nextauth-swarmion root"
+      "name": "notion-ai-assistant root"
     },
     {
       "path": "services/core",
@@ -84,6 +84,10 @@
     {
       "path": "frontend/next-app",
       "name": "frontend next [app]"
+    },
+    {
+      "path": "services/core",
+      "name": "core [service]"
     }
   ]
 }

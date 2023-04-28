@@ -38,9 +38,7 @@ module.exports = {
     'import/order': [
       'error',
       {
-        pathGroups: [
-          { pattern: '@test-supabase-nextauth-swarmion/**', group: 'unknown' },
-        ],
+        pathGroups: [{ pattern: '@notion-ai-assistant/**', group: 'unknown' }],
         groups: [
           ['external', 'builtin'],
           'unknown',
@@ -85,7 +83,7 @@ module.exports = {
       {
         patterns: [
           {
-            group: ['@test-supabase-nextauth-swarmion/*/*'],
+            group: ['@notion-ai-assistant/*/*'],
             message:
               'import of internal modules must be done at the root level.',
           },

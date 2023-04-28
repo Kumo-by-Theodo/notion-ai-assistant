@@ -1,16 +1,34 @@
-import { getHandlerPath, LambdaFunction } from '@swarmion/serverless-helpers';
+import { getCdkHandlerPath } from '@swarmion/serverless-helpers';
+import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { Construct } from 'constructs';
 
-const config: LambdaFunction = {
-  environment: {},
-  handler: getHandlerPath(__dirname),
-  events: [
-    {
-      httpApi: {
-        method: 'get',
-        path: '/health',
-      },
-    },
-  ],
-};
+import { healthContract } from '@notion-ai-assistant/core-contracts';
+import { sharedCdkEsbuildConfig } from '@notion-ai-assistant/serverless-configuration';
 
-export default config;
+type HealthProps = { restApi: RestApi };
+
+export class Health extends Construct {
+  public healthFunction: NodejsFunction;
+
+  constructor(scope: Construct, id: string, { restApi }: HealthProps) {
+    super(scope, id);
+
+    this.healthFunction = new NodejsFunction(this, 'Lambda', {
+      entry: getCdkHandlerPath(__dirname),
+      handler: 'main',
+      runtime: Runtime.NODEJS_16_X,
+      architecture: Architecture.ARM_64,
+      awsSdkConnectionReuse: true,
+      bundling: sharedCdkEsbuildConfig,
+    });
+
+    restApi.root
+      .resourceForPath(healthContract.path)
+      .addMethod(
+        healthContract.method,
+        new LambdaIntegration(this.healthFunction),
+      );
+  }
+}

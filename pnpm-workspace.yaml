@@ -1,5 +1,5 @@
-packages:
-  - 'services/*'
+'packages':
   - 'contracts/*'
   - 'frontend/*'
   - 'packages/*'
+  - 'services/*'

@@ -4,7 +4,7 @@ import {
   swarmionEsbuildConfig,
 } from '@swarmion/serverless-helpers';
 
-export const projectName = 'test-supabase-nextauth-swarmion';
+export const projectName = 'notion-ai-assistant';
 export const region = 'eu-west-1';
 export const frameworkVersion = '>=3.0.0';
 
@@ -44,7 +44,7 @@ export const sharedProviderConfig: ServerlessProviderConfig = {
  */
 export const sharedParams = {
   dev: {
-    profile: 'test-supabase-nextauth-swarmion-developer',
+    profile: 'notion-ai-assistant-developer',
     apiGatewayCorsAllowedOrigins: ['http://localhost:3000'],
   },
   staging: {
