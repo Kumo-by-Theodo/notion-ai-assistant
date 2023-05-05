@@ -1,5 +1,7 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { RestApi } from 'aws-cdk-lib/aws-apigateway';
+import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
+import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
 import { Health } from 'functions/config';
@@ -22,6 +24,16 @@ export class CoreStack extends Stack {
       },
     });
 
-    new Health(this, 'Health', { restApi: coreApi });
+    const s3Bucket = new Bucket(this, 'NotionBucket');
+
+    const policyStatement = new PolicyStatement({
+      actions: ['s3:GetObject'],
+      resources: [s3Bucket.arnForObjects('*')],
+    });
+
+    const { healthFunction } = new Health(this, 'Health', {
+      restApi: coreApi,
+    });
+    healthFunction.addToRolePolicy(policyStatement);
   }
 }
