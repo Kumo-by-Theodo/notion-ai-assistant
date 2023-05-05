@@ -8,6 +8,7 @@ export const healthContract = new ApiGatewayContract({
   path: '/health',
   method: 'GET',
   integrationType: 'restApi',
+
   outputSchemas: {
     [HttpStatusCodes.OK]: {
       type: 'object',
