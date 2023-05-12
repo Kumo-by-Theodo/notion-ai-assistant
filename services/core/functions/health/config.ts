@@ -8,12 +8,16 @@ import { Construct } from 'constructs';
 import { healthContract } from '@notion-ai-assistant/core-contracts';
 import { sharedCdkEsbuildConfig } from '@notion-ai-assistant/serverless-configuration';
 
-type HealthProps = { restApi: RestApi };
+type HealthProps = { restApi: RestApi; s3BucketName: string };
 
 export class Health extends Construct {
   public healthFunction: NodejsFunction;
 
-  constructor(scope: Construct, id: string, { restApi }: HealthProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    { restApi, s3BucketName }: HealthProps,
+  ) {
     super(scope, id);
 
     this.healthFunction = new NodejsFunction(this, 'Lambda', {
@@ -27,6 +31,7 @@ export class Health extends Construct {
       //TODO: embedding can take more times than API GATEWAY timeout.
       // We have to find another way to do this process and reduce back this lambda timeout
       timeout: Duration.minutes(5),
+      environment: { S3_BUCKET_NAME: s3BucketName },
     });
 
     restApi.root

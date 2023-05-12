@@ -33,6 +33,7 @@ export class CoreStack extends Stack {
 
     const { healthFunction } = new Health(this, 'Health', {
       restApi: coreApi,
+      s3BucketName: s3Bucket.bucketName,
     });
     healthFunction.addToRolePolicy(policyStatement);
   }
