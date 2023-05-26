@@ -1,4 +1,4 @@
-const KEY = 'YOUR-TOKEN-KEY';
+const KEY = 'KEY';
 
 import { OpenAIEmbeddings } from 'langchain/embeddings';
 

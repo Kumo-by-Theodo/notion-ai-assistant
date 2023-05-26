@@ -33,19 +33,6 @@ export const main = getHandler(healthContract, { ajv })(async () => {
     const documents = await splitter.createDocuments([str]);
 
     const documentsTexts = documents.map(document => document.pageContent);
-    /*
-    embeds is an array of array
-    const textArr = ['The quick brown fox', 'Jumped over the lazy dog'];
-    const embedResult = [
-      [0.1, 0.2, 0.3, ..., 0.9], // embedding for 'The quick brown fox'
-      [0.2, 0.3, 0.4, ..., 0.8]  // embedding for 'Jumped over the lazy dog'
-    ];
-    In our case, we can use it as:
-    const embedsWithTexts = embeds.forEach((embed, index) => ({
-      embed,
-      chunk: documentsTexts[index],
-    }));
-    */
 
     embeds = await embedDocuments(documentsTexts);
   } catch (err) {

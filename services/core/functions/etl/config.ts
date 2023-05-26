@@ -10,8 +10,8 @@ import { sharedCdkEsbuildConfig } from '@notion-ai-assistant/serverless-configur
 
 type HealthProps = { restApi: RestApi; s3BucketName: string };
 
-export class Health extends Construct {
-  public healthFunction: NodejsFunction;
+export class ETLFunction extends Construct {
+  public etlFunction: NodejsFunction;
 
   constructor(
     scope: Construct,
@@ -20,7 +20,7 @@ export class Health extends Construct {
   ) {
     super(scope, id);
 
-    this.healthFunction = new NodejsFunction(this, 'Lambda', {
+    this.etlFunction = new NodejsFunction(this, 'Lambda', {
       entry: getCdkHandlerPath(__dirname),
       handler: 'main',
       //Langchain OpenAIEmbeddings function is falling under node18
@@ -38,7 +38,7 @@ export class Health extends Construct {
       .resourceForPath(healthContract.path)
       .addMethod(
         healthContract.method,
-        new LambdaIntegration(this.healthFunction),
+        new LambdaIntegration(this.etlFunction),
       );
   }
 }

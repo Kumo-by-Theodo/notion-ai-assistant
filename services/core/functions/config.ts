@@ -1,1 +1,1 @@
-export { Health } from './health/config';
+export { ETLFunction } from './etl/config';

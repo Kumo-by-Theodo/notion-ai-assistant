@@ -4,7 +4,7 @@ import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 
-import { Health } from 'functions/config';
+import { ETLFunction } from 'functions/config';
 
 interface CoreProps {
   stage: string;
@@ -31,10 +31,10 @@ export class CoreStack extends Stack {
       resources: [s3Bucket.arnForObjects('*')],
     });
 
-    const { healthFunction } = new Health(this, 'Health', {
+    const { etlFunction } = new ETLFunction(this, 'Health', {
       restApi: coreApi,
       s3BucketName: s3Bucket.bucketName,
     });
-    healthFunction.addToRolePolicy(policyStatement);
+    etlFunction.addToRolePolicy(policyStatement);
   }
 }
