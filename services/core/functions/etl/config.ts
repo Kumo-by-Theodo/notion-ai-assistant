@@ -30,7 +30,7 @@ export class ETLFunction extends Construct {
       bundling: sharedCdkEsbuildConfig,
       //TODO: embedding can take more times than API GATEWAY timeout.
       // We have to find another way to do this process and reduce back this lambda timeout
-      timeout: Duration.minutes(5),
+      timeout: Duration.minutes(3),
       environment: { S3_BUCKET_NAME: s3BucketName },
     });
 

@@ -31,7 +31,7 @@ export class CoreStack extends Stack {
       resources: [s3Bucket.arnForObjects('*')],
     });
 
-    const { etlFunction } = new ETLFunction(this, 'Health', {
+    const { etlFunction } = new ETLFunction(this, 'ETL', {
       restApi: coreApi,
       s3BucketName: s3Bucket.bucketName,
     });
