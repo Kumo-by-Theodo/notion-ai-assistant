@@ -5,7 +5,7 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
-import { ETLFunction } from 'functions/config';
+import { GetAnswer, StoreEmbeddings } from 'functions/config';
 
 interface CoreProps {
   stage: string;
@@ -36,13 +36,34 @@ export class CoreStack extends Stack {
       secretName: 'openAISecret',
     });
 
-    const { etlFunction } = new ETLFunction(this, 'ETL', {
-      restApi: coreApi,
-      s3BucketName: s3Bucket.bucketName,
-      openAISecretArn: openAISecret.secretArn,
-    });
-    etlFunction.addToRolePolicy(policyStatement);
+    const supabaseKeySecret = new secretsmanager.Secret(
+      this,
+      'supabaseKeySecret',
+      {
+        secretName: 'supabaseKeySecret',
+      },
+    );
 
-    openAISecret.grantRead(etlFunction);
+    const { getAnswerFunction } = new GetAnswer(this, 'GetAnswer', {
+      restApi: coreApi,
+      openAISecretArn: openAISecret.secretArn,
+      supabaseKeyArn: supabaseKeySecret.secretArn,
+    });
+    openAISecret.grantRead(getAnswerFunction);
+    supabaseKeySecret.grantRead(getAnswerFunction);
+
+    const { storeEmbeddingsFunction } = new StoreEmbeddings(
+      this,
+      'StoreEmbeddings',
+      {
+        restApi: coreApi,
+        s3BucketName: s3Bucket.bucketName,
+        supabaseKeyArn: supabaseKeySecret.secretArn,
+        openAISecretArn: openAISecret.secretArn,
+      },
+    );
+    storeEmbeddingsFunction.addToRolePolicy(policyStatement);
+    openAISecret.grantRead(storeEmbeddingsFunction);
+    supabaseKeySecret.grantRead(storeEmbeddingsFunction);
   }
 }

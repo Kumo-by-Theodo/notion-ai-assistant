@@ -29,6 +29,7 @@
     "@aws-sdk/client-secrets-manager": "^3.344.0",
     "@notion-ai-assistant/core-contracts": "workspace:^1.0.0",
     "@notion-ai-assistant/serverless-configuration": "workspace:^1.0.0",
+    "@supabase/supabase-js": "^2.24.0",
     "@swarmion/serverless-contracts": "^0.28.1",
     "@swarmion/serverless-helpers": "^0.28.1",
     "ajv": "^8.12.0",
