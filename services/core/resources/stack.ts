@@ -5,7 +5,7 @@ import { Bucket } from 'aws-cdk-lib/aws-s3';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
-import { ETLFunction } from 'functions/config';
+import { ETLFunction, StoreEmbeddings } from 'functions/config';
 
 interface CoreProps {
   stage: string;
@@ -44,5 +44,15 @@ export class CoreStack extends Stack {
     etlFunction.addToRolePolicy(policyStatement);
 
     openAISecret.grantRead(etlFunction);
+
+    const { storeEmbeddingsFunction } = new StoreEmbeddings(
+      this,
+      'StoreEmbeddings',
+      {
+        restApi: coreApi,
+        s3BucketName: s3Bucket.bucketName,
+      },
+    );
+    storeEmbeddingsFunction.addToRolePolicy(policyStatement);
   }
 }
