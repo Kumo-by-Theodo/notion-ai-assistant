@@ -1,4 +1,5 @@
 import { App } from 'aws-cdk-lib';
+import dotenv from 'dotenv';
 
 import {
   defaultEnvironment,
@@ -8,6 +9,9 @@ import {
 } from '@notion-ai-assistant/serverless-configuration';
 
 import { CoreStack } from './stack';
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = new App();
 

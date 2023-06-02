@@ -1,22 +1,36 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getHandler, HttpStatusCodes } from '@swarmion/serverless-contracts';
-import { getEnvVariable } from '@swarmion/serverless-helpers';
 import Ajv from 'ajv';
 import { LLMChain } from 'langchain/chains';
 import { ChainValues } from 'langchain/dist/schema';
+import { OpenAIEmbeddings } from 'langchain/embeddings';
+import { OpenAI } from 'langchain/llms/openai';
 import { PromptTemplate } from 'langchain/prompts';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 
-import { healthContract } from '@notion-ai-assistant/core-contracts';
+import { etlFunctionContract } from '@notion-ai-assistant/core-contracts';
 
-import { openAIEmbeddings, openAIModel } from 'libs/utils/embedDocuments';
+import { getEnvVariable, getSecretValue } from 'helpers';
 
 const ajv = new Ajv();
 
 const client = new S3Client({});
 
-export const main = getHandler(healthContract, { ajv })(async () => {
+export const main = getHandler(etlFunctionContract, { ajv })(async () => {
+  const OPENAI_API_KEY = await getSecretValue(
+    getEnvVariable('OPENAI_API_KEY_ARN'),
+  );
+
+  const openAIModel = new OpenAI({
+    openAIApiKey: OPENAI_API_KEY,
+    temperature: 0.9,
+  });
+
+  const openAIEmbeddings = new OpenAIEmbeddings({
+    openAIApiKey: OPENAI_API_KEY,
+  });
+
   const question = 'what is a good architecture';
 
   const command = new GetObjectCommand({

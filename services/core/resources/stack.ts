@@ -2,6 +2,7 @@ import { Stack, StackProps } from 'aws-cdk-lib';
 import { RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
 import { ETLFunction } from 'functions/config';
@@ -31,10 +32,17 @@ export class CoreStack extends Stack {
       resources: [s3Bucket.arnForObjects('*')],
     });
 
+    const openAISecret = new secretsmanager.Secret(this, 'openAISecret', {
+      secretName: 'openAISecret',
+    });
+
     const { etlFunction } = new ETLFunction(this, 'ETL', {
       restApi: coreApi,
       s3BucketName: s3Bucket.bucketName,
+      openAISecretArn: openAISecret.secretArn,
     });
     etlFunction.addToRolePolicy(policyStatement);
+
+    openAISecret.grantRead(etlFunction);
   }
 }

@@ -5,10 +5,14 @@ import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 
-import { healthContract } from '@notion-ai-assistant/core-contracts';
+import { etlFunctionContract } from '@notion-ai-assistant/core-contracts';
 import { sharedCdkEsbuildConfig } from '@notion-ai-assistant/serverless-configuration';
 
-type HealthProps = { restApi: RestApi; s3BucketName: string };
+type ETLFunctionProps = {
+  restApi: RestApi;
+  s3BucketName: string;
+  openAISecretArn: string;
+};
 
 export class ETLFunction extends Construct {
   public etlFunction: NodejsFunction;
@@ -16,7 +20,7 @@ export class ETLFunction extends Construct {
   constructor(
     scope: Construct,
     id: string,
-    { restApi, s3BucketName }: HealthProps,
+    { restApi, s3BucketName, openAISecretArn }: ETLFunctionProps,
   ) {
     super(scope, id);
 
@@ -31,13 +35,16 @@ export class ETLFunction extends Construct {
       //TODO: embedding can take more times than API GATEWAY timeout.
       // We have to find another way to do this process and reduce back this lambda timeout
       timeout: Duration.minutes(3),
-      environment: { S3_BUCKET_NAME: s3BucketName },
+      environment: {
+        S3_BUCKET_NAME: s3BucketName,
+        OPENAI_API_KEY_ARN: openAISecretArn,
+      },
     });
 
     restApi.root
-      .resourceForPath(healthContract.path)
+      .resourceForPath(etlFunctionContract.path)
       .addMethod(
-        healthContract.method,
+        etlFunctionContract.method,
         new LambdaIntegration(this.etlFunction),
       );
   }

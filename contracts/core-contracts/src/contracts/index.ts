@@ -1,2 +1,2 @@
 export * from './cloudFormation';
-export * from './healthContract';
+export * from './etlFunctionContract';
