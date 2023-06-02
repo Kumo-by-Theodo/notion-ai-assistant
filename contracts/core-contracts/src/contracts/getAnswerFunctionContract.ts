@@ -3,7 +3,7 @@ import {
   HttpStatusCodes,
 } from '@swarmion/serverless-contracts';
 
-export const etlFunctionContract = new ApiGatewayContract({
+export const getAnswerFunctionContract = new ApiGatewayContract({
   id: 'core-health',
   path: '/health',
   method: 'GET',

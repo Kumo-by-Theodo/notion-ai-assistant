@@ -1,12 +1,13 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createClient } from '@supabase/supabase-js';
 import { HttpStatusCodes } from '@swarmion/serverless-contracts';
-import { getEnvVariable } from '@swarmion/serverless-helpers';
+import { OpenAIEmbeddings } from 'langchain/embeddings';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
 
-import { embedQuery } from 'libs/utils/embedDocuments';
+import { getEnvVariable, getSecretValue } from 'helpers';
 
 const client = new S3Client({});
+const SUPABASE_URL = getEnvVariable('SUPABASE_URL');
 
 export const main = async (): Promise<unknown> => {
   const fileName =
@@ -28,14 +29,21 @@ export const main = async (): Promise<unknown> => {
   });
   const documents = await splitter.createDocuments([notionDatabase]);
 
-  const supabaseUrl = 'https://ydkcfsqbwtvgbhktjegg.supabase.co';
-  const supabaseAnonKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlka2Nmc3Fid3R2Z2Joa3RqZWdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODU3MTIwODIsImV4cCI6MjAwMTI4ODA4Mn0.QkxDXfhMxFqrU7BClb2t-3Aj0yMNUzOu6g5hx9m_Pmc';
-  // Create a single supabase client for interacting with your database
-  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  const SUPABASE_KEY = await getSecretValue(getEnvVariable('SUPABASE_KEY_ARN'));
+
+  // Put outside of main to run during cold start
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const OPENAI_API_KEY = await getSecretValue(
+    getEnvVariable('OPENAI_API_KEY_ARN'),
+  );
+
+  const openAIEmbeddings = new OpenAIEmbeddings({
+    openAIApiKey: OPENAI_API_KEY,
+  });
 
   const saveVectorEmbed = async (chunk: string) => {
-    const embed = await embedQuery(chunk);
+    const embed = await openAIEmbeddings.embedQuery(chunk);
 
     await supabase.from('documents').insert({
       title: fileName,

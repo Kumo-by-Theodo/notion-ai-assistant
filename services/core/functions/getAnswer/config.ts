@@ -5,26 +5,28 @@ import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 
-import { etlFunctionContract } from '@notion-ai-assistant/core-contracts';
+import { getAnswerFunctionContract } from '@notion-ai-assistant/core-contracts';
 import { sharedCdkEsbuildConfig } from '@notion-ai-assistant/serverless-configuration';
 
-type ETLFunctionProps = {
+import { getEnvVariable } from 'helpers';
+
+type GetAnswerProps = {
   restApi: RestApi;
-  s3BucketName: string;
   openAISecretArn: string;
+  supabaseKeyArn: string;
 };
 
-export class ETLFunction extends Construct {
-  public etlFunction: NodejsFunction;
+export class GetAnswer extends Construct {
+  public getAnswerFunction: NodejsFunction;
 
   constructor(
     scope: Construct,
     id: string,
-    { restApi, s3BucketName, openAISecretArn }: ETLFunctionProps,
+    { restApi, openAISecretArn, supabaseKeyArn }: GetAnswerProps,
   ) {
     super(scope, id);
 
-    this.etlFunction = new NodejsFunction(this, 'Lambda', {
+    this.getAnswerFunction = new NodejsFunction(this, 'Lambda', {
       entry: getCdkHandlerPath(__dirname),
       handler: 'main',
       //Langchain OpenAIEmbeddings function is falling under node18
@@ -36,16 +38,17 @@ export class ETLFunction extends Construct {
       // We have to find another way to do this process and reduce back this lambda timeout
       timeout: Duration.minutes(3),
       environment: {
-        S3_BUCKET_NAME: s3BucketName,
         OPENAI_API_KEY_ARN: openAISecretArn,
+        SUPABASE_URL: getEnvVariable('SUPABASE_URL'),
+        SUPABASE_KEY_ARN: supabaseKeyArn,
       },
     });
 
     restApi.root
-      .resourceForPath(etlFunctionContract.path)
+      .resourceForPath(getAnswerFunctionContract.path)
       .addMethod(
-        etlFunctionContract.method,
-        new LambdaIntegration(this.etlFunction),
+        getAnswerFunctionContract.method,
+        new LambdaIntegration(this.getAnswerFunction),
       );
   }
 }

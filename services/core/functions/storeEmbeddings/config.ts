@@ -7,7 +7,14 @@ import { Construct } from 'constructs';
 
 import { sharedCdkEsbuildConfig } from '@notion-ai-assistant/serverless-configuration';
 
-type StoreEmbeddingsProps = { restApi: RestApi; s3BucketName: string };
+import { getEnvVariable } from 'helpers';
+
+type StoreEmbeddingsProps = {
+  restApi: RestApi;
+  s3BucketName: string;
+  supabaseKeyArn: string;
+  openAISecretArn: string;
+};
 
 export class StoreEmbeddings extends Construct {
   public storeEmbeddingsFunction: NodejsFunction;
@@ -15,7 +22,12 @@ export class StoreEmbeddings extends Construct {
   constructor(
     scope: Construct,
     id: string,
-    { restApi, s3BucketName }: StoreEmbeddingsProps,
+    {
+      restApi,
+      s3BucketName,
+      supabaseKeyArn,
+      openAISecretArn,
+    }: StoreEmbeddingsProps,
   ) {
     super(scope, id);
 
@@ -30,7 +42,12 @@ export class StoreEmbeddings extends Construct {
       //TODO: embedding can take more times than API GATEWAY timeout.
       // We have to find another way to do this process and reduce back this lambda timeout
       timeout: Duration.minutes(3),
-      environment: { S3_BUCKET_NAME: s3BucketName },
+      environment: {
+        S3_BUCKET_NAME: s3BucketName,
+        SUPABASE_KEY_ARN: supabaseKeyArn,
+        SUPABASE_URL: getEnvVariable('SUPABASE_URL'),
+        OPENAI_API_KEY_ARN: openAISecretArn,
+      },
     });
 
     restApi.root
