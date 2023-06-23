@@ -6,7 +6,7 @@ import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
-import { GetAnswer, StoreEmbeddings } from 'functions/config';
+import { GetAnswer, SlackRequest, StoreEmbeddings } from 'functions/config';
 
 interface CoreProps {
   stage: string;
@@ -37,6 +37,10 @@ export class CoreStack extends Stack {
       secretName: 'openAISecret',
     });
 
+    const slackTokenSecret = new Secret(this, 'slackTokenSecret', {
+      secretName: 'slackTokenSecret',
+    });
+
     const supabaseKeySecret = new Secret(this, 'supabaseKeySecret', {
       secretName: 'supabaseKeySecret',
     });
@@ -48,6 +52,17 @@ export class CoreStack extends Stack {
     });
     openAISecret.grantRead(getAnswer);
     supabaseKeySecret.grantRead(getAnswer);
+
+    const { slackRequest } = new SlackRequest(this, 'SlackRequest', {
+      restApi: coreApi,
+      openAISecretArn: openAISecret.secretArn,
+      supabaseKeyArn: supabaseKeySecret.secretArn,
+      slackTokenSecretArn: slackTokenSecret.secretArn,
+    });
+
+    openAISecret.grantRead(slackRequest);
+    supabaseKeySecret.grantRead(slackRequest);
+    slackTokenSecret.grantRead(slackRequest);
 
     const { storeEmbeddingsFunction } = new StoreEmbeddings(
       this,

@@ -30,9 +30,11 @@
     "@aws-sdk/client-secrets-manager": "^3.344.0",
     "@notion-ai-assistant/core-contracts": "workspace:^1.0.0",
     "@notion-ai-assistant/serverless-configuration": "workspace:^1.0.0",
+    "@slack/web-api": "^6.8.1",
     "@supabase/supabase-js": "^2.24.0",
     "@swarmion/serverless-contracts": "^0.28.1",
     "@swarmion/serverless-helpers": "^0.28.1",
+    "@types/aws-lambda": "^8.10.119",
     "ajv": "^8.12.0",
     "aws-lambda": "^1.0.7",
     "langchain": "^0.0.69"
