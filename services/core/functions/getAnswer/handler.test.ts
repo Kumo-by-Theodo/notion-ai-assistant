@@ -5,7 +5,8 @@ import {
 
 import { main } from './handler';
 
-describe('health handler', () => {
+describe('getAnswer handler', () => {
+  // TODO: test the getAnswer handler
   it.skip('should return "ok"', async () => {
     expect(
       await main(

@@ -1,8 +1,9 @@
 import { Stack, StackProps } from 'aws-cdk-lib';
 import { RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { Bucket } from 'aws-cdk-lib/aws-s3';
-import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import { Bucket, EventType } from 'aws-cdk-lib/aws-s3';
+import { LambdaDestination } from 'aws-cdk-lib/aws-s3-notifications';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 
 import { GetAnswer, StoreEmbeddings } from 'functions/config';
@@ -32,25 +33,21 @@ export class CoreStack extends Stack {
       resources: [s3Bucket.arnForObjects('*')],
     });
 
-    const openAISecret = new secretsmanager.Secret(this, 'openAISecret', {
+    const openAISecret = new Secret(this, 'openAISecret', {
       secretName: 'openAISecret',
     });
 
-    const supabaseKeySecret = new secretsmanager.Secret(
-      this,
-      'supabaseKeySecret',
-      {
-        secretName: 'supabaseKeySecret',
-      },
-    );
+    const supabaseKeySecret = new Secret(this, 'supabaseKeySecret', {
+      secretName: 'supabaseKeySecret',
+    });
 
-    const { getAnswerFunction } = new GetAnswer(this, 'GetAnswer', {
+    const { getAnswer } = new GetAnswer(this, 'GetAnswer', {
       restApi: coreApi,
       openAISecretArn: openAISecret.secretArn,
       supabaseKeyArn: supabaseKeySecret.secretArn,
     });
-    openAISecret.grantRead(getAnswerFunction);
-    supabaseKeySecret.grantRead(getAnswerFunction);
+    openAISecret.grantRead(getAnswer);
+    supabaseKeySecret.grantRead(getAnswer);
 
     const { storeEmbeddingsFunction } = new StoreEmbeddings(
       this,
@@ -62,8 +59,14 @@ export class CoreStack extends Stack {
         openAISecretArn: openAISecret.secretArn,
       },
     );
+    s3Bucket.grantRead(storeEmbeddingsFunction);
     storeEmbeddingsFunction.addToRolePolicy(policyStatement);
     openAISecret.grantRead(storeEmbeddingsFunction);
     supabaseKeySecret.grantRead(storeEmbeddingsFunction);
+
+    s3Bucket.addEventNotification(
+      EventType.OBJECT_CREATED,
+      new LambdaDestination(storeEmbeddingsFunction),
+    );
   }
 }

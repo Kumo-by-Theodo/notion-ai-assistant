@@ -25,6 +25,7 @@
     "test-unit": "vitest run --coverage --passWithNoTests"
   },
   "dependencies": {
+    "@aws-cdk/aws-lambda-event-sources": "^1.203.0",
     "@aws-sdk/client-s3": "^3.327.0",
     "@aws-sdk/client-secrets-manager": "^3.344.0",
     "@notion-ai-assistant/core-contracts": "workspace:^1.0.0",
@@ -33,9 +34,11 @@
     "@swarmion/serverless-contracts": "^0.28.1",
     "@swarmion/serverless-helpers": "^0.28.1",
     "ajv": "^8.12.0",
+    "aws-lambda": "^1.0.7",
     "langchain": "^0.0.69"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.119",
     "@types/node": "^18.16.2",
     "@vitest/coverage-c8": "^0.30.1",
     "aws-cdk": "^2.77.0",

@@ -1,4 +1,7 @@
-import { getCdkHandlerPath } from '@swarmion/serverless-helpers';
+import {
+  getCdkHandlerPath,
+  getEnvVariable,
+} from '@swarmion/serverless-helpers';
 import { Duration } from 'aws-cdk-lib';
 import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
@@ -6,8 +9,6 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 
 import { sharedCdkEsbuildConfig } from '@notion-ai-assistant/serverless-configuration';
-
-import { getEnvVariable } from 'helpers';
 
 type StoreEmbeddingsProps = {
   restApi: RestApi;
