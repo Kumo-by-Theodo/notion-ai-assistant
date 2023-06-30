@@ -1,16 +1,19 @@
-import { OpenAI } from 'langchain';
+export const getAnswerFromGPT = (question: string): string => {
+  console.log({ question });
 
-import { getEnvVariable, getSecretValue } from 'helpers';
+  return 'hello';
 
-export const getAnswerFromGPT = async (question: string): Promise<string> => {
-  const OPENAI_API_KEY = await getSecretValue(
-    getEnvVariable('OPENAI_API_KEY_ARN'),
-  );
+  /*
 
-  const openAIModel = new OpenAI({
-    openAIApiKey: OPENAI_API_KEY,
-    temperature: 0.9,
-  });
+    const OPENAI_API_KEY = await getSecretValue(
+        getEnvVariable('OPENAI_API_KEY_ARN'),
+    );
 
-  return await openAIModel.call(question);
+    const openAIModel = new OpenAI({
+        openAIApiKey: OPENAI_API_KEY,
+        temperature: 0.9,
+    });
+
+    return (await openAIModel.call(question))
+    */
 };
