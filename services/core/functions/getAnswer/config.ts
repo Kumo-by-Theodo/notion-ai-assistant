@@ -1,14 +1,15 @@
-import { getCdkHandlerPath } from '@swarmion/serverless-helpers';
+import {
+  getCdkHandlerPath,
+  getEnvVariable,
+} from '@swarmion/serverless-helpers';
 import { Duration } from 'aws-cdk-lib';
 import { LambdaIntegration, RestApi } from 'aws-cdk-lib/aws-apigateway';
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 
-import { getAnswerFunctionContract } from '@notion-ai-assistant/core-contracts';
+import { getAnswerContract } from '@notion-ai-assistant/core-contracts';
 import { sharedCdkEsbuildConfig } from '@notion-ai-assistant/serverless-configuration';
-
-import { getEnvVariable } from 'helpers';
 
 type GetAnswerProps = {
   restApi: RestApi;
@@ -17,7 +18,7 @@ type GetAnswerProps = {
 };
 
 export class GetAnswer extends Construct {
-  public getAnswerFunction: NodejsFunction;
+  public getAnswer: NodejsFunction;
 
   constructor(
     scope: Construct,
@@ -26,7 +27,7 @@ export class GetAnswer extends Construct {
   ) {
     super(scope, id);
 
-    this.getAnswerFunction = new NodejsFunction(this, 'Lambda', {
+    this.getAnswer = new NodejsFunction(this, 'Lambda', {
       entry: getCdkHandlerPath(__dirname),
       handler: 'main',
       //Langchain OpenAIEmbeddings function is falling under node18
@@ -45,10 +46,10 @@ export class GetAnswer extends Construct {
     });
 
     restApi.root
-      .resourceForPath(getAnswerFunctionContract.path)
+      .resourceForPath(getAnswerContract.path)
       .addMethod(
-        getAnswerFunctionContract.method,
-        new LambdaIntegration(this.getAnswerFunction),
+        getAnswerContract.method,
+        new LambdaIntegration(this.getAnswer),
       );
   }
 }

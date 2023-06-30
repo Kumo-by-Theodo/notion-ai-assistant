@@ -1,35 +1,49 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { createClient } from '@supabase/supabase-js';
 import { HttpStatusCodes } from '@swarmion/serverless-contracts';
+import { getEnvVariable } from '@swarmion/serverless-helpers';
+import { S3Event } from 'aws-lambda';
+import { Document } from 'langchain/document';
 import { OpenAIEmbeddings } from 'langchain/embeddings';
 import { CharacterTextSplitter } from 'langchain/text_splitter';
 
-import { getEnvVariable, getSecretValue } from 'helpers';
+import { getSecretValue } from 'helpers';
 
 const client = new S3Client({});
 const SUPABASE_URL = getEnvVariable('SUPABASE_URL');
 
-export const main = async (): Promise<unknown> => {
-  const fileName =
-    'How to Conceive a Good Architecture 8091ba005a94416bb10f2ca778c1c796.md';
-  const command = new GetObjectCommand({
-    Bucket: getEnvVariable('S3_BUCKET_NAME'),
-    Key: fileName,
-  });
-
-  let notionDatabase = '';
-
-  const response = await client.send(command);
-  notionDatabase = (await response.Body?.transformToString()) ?? '';
+export const main = async (event: S3Event): Promise<unknown> => {
+  const SUPABASE_KEY = await getSecretValue(getEnvVariable('SUPABASE_KEY_ARN'));
 
   const splitter = new CharacterTextSplitter({
     separator: ' ',
     chunkSize: 800,
     chunkOverlap: 3,
   });
-  const documents = await splitter.createDocuments([notionDatabase]);
 
-  const SUPABASE_KEY = await getSecretValue(getEnvVariable('SUPABASE_KEY_ARN'));
+  const notionDatabase: string[] = [];
+  const metadatas: { title: string }[] = [];
+
+  await Promise.all(
+    event.Records.map(async record => {
+      const fileName = record.s3.object.key;
+
+      const command = new GetObjectCommand({
+        Bucket: getEnvVariable('S3_BUCKET_NAME'),
+        Key: fileName,
+      });
+      let fileContent = '';
+
+      const response = await client.send(command);
+      fileContent = (await response.Body?.transformToString()) ?? '';
+      notionDatabase.push(fileContent);
+      metadatas.push({ title: fileName });
+    }),
+  );
+
+  // @ts-expect-error wrong typing of Document
+  const documents: Document<{ title: string }>[] =
+    await splitter.createDocuments(notionDatabase, metadatas);
 
   // Put outside of main to run during cold start
   const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -42,7 +56,13 @@ export const main = async (): Promise<unknown> => {
     openAIApiKey: OPENAI_API_KEY,
   });
 
-  const saveVectorEmbed = async (chunk: string) => {
+  const saveVectorEmbed = async ({
+    chunk,
+    fileName,
+  }: {
+    chunk: string;
+    fileName: string;
+  }) => {
     const embed = await openAIEmbeddings.embedQuery(chunk);
 
     await supabase.from('documents').insert({
@@ -53,7 +73,12 @@ export const main = async (): Promise<unknown> => {
   };
 
   await Promise.all(
-    documents.map(document => saveVectorEmbed(document.pageContent)),
+    documents.map(document =>
+      saveVectorEmbed({
+        chunk: document.pageContent,
+        fileName: document.metadata.title,
+      }),
+    ),
   );
 
   return {
